@@ -1,106 +1,185 @@
 class RecipeCard extends HTMLElement {
-  constructor() {
-    // Part 1 Expose - TODO
+    constructor() {
+        // Part 1 Expose - TODO
+        super();
+        this.attachShadow({mode: 'open'});
+        // You'll want to attach the shadow DOM here
+    }
 
-    // You'll want to attach the shadow DOM here
-  }
+    set data(data) {
+        // This is the CSS that you'll use for your recipe cards
+        const styleElem = document.createElement('style');
+        const styles = `
+        * {
+            font-family: sans-serif;
+            margin: 0;
+            padding: 0;
+        }
 
-  set data(data) {
-    // This is the CSS that you'll use for your recipe cards
-    const styleElem = document.createElement('style');
-    const styles = `
-      * {
-        font-family: sans-serif;
-        margin: 0;
-        padding: 0;
-      }
-      
-      a {
-        text-decoration: none;
-      }
+        a {
+            text-decoration: none;
+        }
 
-      a:hover {
-        text-decoration: underline;
-      }
-      
-      article {
-        align-items: center;
-        border: 1px solid rgb(223, 225, 229);
-        border-radius: 8px;
-        display: grid;
-        grid-template-rows: 118px 56px 14px 18px 15px 36px;
-        height: auto;
-        row-gap: 5px;
-        padding: 0 16px 16px 16px;
-        width: 178px;
-      }
+        a:hover {
+            text-decoration: underline;
+        }
 
-      div.rating {
-        align-items: center;
-        column-gap: 5px;
-        display: flex;
-      }
-      
-      div.rating > img {
-        height: auto;
-        display: inline-block;
-        object-fit: scale-down;
-        width: 78px;
-      }
+        article {
+            align-items: center;
+            border: 1px solid rgb(223, 225, 229);
+            border-radius: 8px;
+            display: grid;
+            grid-template-rows: 118px 56px 14px 18px 15px 36px;
+            height: auto;
+            row-gap: 5px;
+            padding: 0 16px 16px 16px;
+            width: 178px;
+        }
 
-      article > img {
-        border-top-left-radius: 8px;
-        border-top-right-radius: 8px;
-        height: 118px;
-        object-fit: cover;
-        margin-left: -16px;
-        width: calc(100% + 32px);
-      }
+        div.rating {
+            align-items: center;
+            column-gap: 5px;
+            display: flex;
+        }
 
-      p.ingredients {
-        height: 32px;
-        line-height: 16px;
-        padding-top: 4px;
-        overflow: hidden;
-      }
-      
-      p.organization {
-        color: black !important;
-      }
+        div.rating > img {
+            height: auto;
+            display: inline-block;
+            object-fit: scale-down;
+            width: 78px;
+        }
 
-      p.title {
-        display: -webkit-box;
-        font-size: 16px;
-        height: 36px;
-        line-height: 18px;
-        overflow: hidden;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-      }
+        article > img {
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            height: 118px;
+            object-fit: cover;
+            margin-left: -16px;
+            width: calc(100% + 32px);
+        }
 
-      p:not(.title), span, time {
-        color: #70757A;
-        font-size: 12px;
-      }
-    `;
-    styleElem.innerHTML = styles;
+        p.ingredients {
+            height: 32px;
+            line-height: 16px;
+            padding-top: 4px;
+            overflow: hidden;
+        }
 
-    // Here's the root element that you'll want to attach all of your other elements to
-    const card = document.createElement('article');
+        p.organization {
+            color: black !important;
+        }
 
-    // Some functions that will be helpful here:
-    //    document.createElement()
-    //    document.querySelector()
-    //    element.classList.add()
-    //    element.setAttribute()
-    //    element.appendChild()
-    //    & All of the helper functions below
+        p.title {
+            display: -webkit-box;
+            font-size: 16px;
+            height: 36px;
+            line-height: 18px;
+            overflow: hidden;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
 
-    // Make sure to attach your root element and styles to the shadow DOM you
-    // created in the constructor()
+        p:not(.title), span, time {
+            color: #70757A;
+            font-size: 12px;
+        }
+        `;
+        styleElem.innerHTML = styles;
 
-    // Part 1 Expose - TODO
-  }
+        // Here's the root element that you'll want to attach all of your other elements to
+        const card = document.createElement('article');
+
+        // Some functions that will be helpful here:
+        //    document.createElement()
+        //    document.querySelector()
+        //    element.classList.add()
+        //    element.setAttribute()
+        //    element.appendChild()
+        //    & All of the helper functions below
+
+        // Make sure to attach your root element and styles to the shadow DOM you
+        // created in the constructor()
+
+        // Part 1 Expose - TODO
+        var image = document.createElement('img');
+        image.setAttribute('src', searchForKey(data, 'thumbnailUrl'));
+        image.setAttribute('alt', searchForKey(data, 'headline')); 
+        card.appendChild(image);
+
+        var title = document.createElement('p');
+        title.className = 'title';
+        title.innerText = searchForKey(data, 'headline');
+        title.href = getUrl(data);
+        card.appendChild(title);
+
+        var org = document.createElement('p');
+        org.className = 'organization';
+        var org_name = getOrganization(data);
+        org.innerText = org_name;
+        card.appendChild(org);
+
+        var rate = document.createElement('div');
+        rate.className = 'rating';
+        var rating = searchForKey(data, 'ratingValue');
+        var val = document.createElement('span');
+        if (rating == undefined) {
+            val.innerText = 'No Reviews';
+            rate.appendChild(val);
+        }
+        else {
+            val.innerText = rating;
+            rate.appendChild(val);
+            var rate_stars = document.createElement('img');
+            var rate_stars_src;
+            var rate_stars_alt;
+            rating = Math.round(rating);
+            switch(rating) {
+                case 5:
+                    rate_stars_src = 'assets/images/icons/5-star.svg';
+                    rate_stars_alt = '5 stars';
+                    break;
+                case 4: 
+                    rate_stars_src = 'assets/images/icons/4-star.svg';
+                    rate_stars_alt = '4 stars';
+                    break;
+                case 3: 
+                    rate_stars_src = 'assets/images/icons/3-star.svg';
+                    rate_stars_alt = '3 stars';
+                    break;
+                case 2: 
+                    rate_stars_src = 'assets/images/icons/2-star.svg';
+                    rate_stars_alt = '2 stars';
+                    break;
+                case 1: 
+                    rate_stars_src = 'assets/images/icons/1-star.svg';
+                    rate_stars_alt = '1 star';
+                    break;
+                case 0: 
+                    rate_stars_src = 'assets/images/icons/0-star.svg';
+                    rate_stars_alt = '0 star';
+                    break;
+            }
+            rate_stars.src = rate_stars_src;
+            rate_stars.alt = rate_stars_alt;
+            rate.appendChild(rate_stars);
+            var rate_num = document.createElement('span');
+            rate_num.innerText = '(' + searchForKey(data, 'ratingCount') + ')';
+            rate.appendChild(rate_num);
+        }
+        card.appendChild(rate);
+
+        var time = document.createElement('time');
+        time.innerText = convertTime(searchForKey(data, 'totalTime'));
+        card.appendChild(time);
+
+        var ingredient = document.createElement('p');
+        ingredient.className = 'ingredients';
+        ingredient.innerText = createIngredientList(searchForKey(data, 'recipeIngredient'));
+        card.append(ingredient);
+
+        this.shadowRoot.appendChild(styleElem);
+        this.shadowRoot.appendChild(card);
+    }
 }
 
 
@@ -122,12 +201,12 @@ function searchForKey(object, key) {
     if (k === key) {
       value = object[k];
       return true;
-    }
-    if (object[k] && typeof object[k] === 'object') {
+  }
+  if (object[k] && typeof object[k] === 'object') {
       value = searchForKey(object[k], key);
       return value !== undefined;
-    }
-  });
+  }
+});
   return value;
 }
 
@@ -141,9 +220,9 @@ function getUrl(data) {
   if (data['@graph']) {
     for (let i = 0; i < data['@graph'].length; i++) {
       if (data['@graph'][i]['@type'] == 'Article') return data['@graph'][i]['@id'];
-    }
-  };
-  return null;
+  }
+};
+return null;
 }
 
 /**
@@ -158,10 +237,10 @@ function getOrganization(data) {
     for (let i = 0; i < data['@graph'].length; i++) {
       if (data['@graph'][i]['@type'] == 'Organization') {
         return data['@graph'][i].name;
-      }
     }
-  };
-  return null;
+}
+};
+return null;
 }
 
 /**
@@ -181,15 +260,15 @@ function convertTime(time) {
     for (let i = 0; i < timeArr.length; i++) {
       if (timeArr[i] == 'H') return `${timeStr} hr`;
       timeStr += timeArr[i];
-    }
-  } else {
+  }
+} else {
     for (let i = 0; i < timeArr.length; i++) {
       if (timeArr[i] == 'M') return `${timeStr} min`;
       timeStr += timeArr[i];
-    }
   }
+}
 
-  return '';
+return '';
 }
 
 /**
@@ -199,26 +278,26 @@ function convertTime(time) {
  *                              imported data
  * @return {String} the string comma separate list of ingredients from the array
  */
-function createIngredientList(ingredientArr) {
+ function createIngredientList(ingredientArr) {
   let finalIngredientList = '';
 
-  /**
-   * Removes the quantity and measurement from an ingredient string.
-   * This isn't perfect, it makes the assumption that there will always be a quantity
-   * (sometimes there isn't, so this would fail on something like '2 apples' or 'Some olive oil').
-   * For the purposes of this lab you don't have to worry about those cases.
-   * @param {String} ingredient the raw ingredient string you'd like to process
-   * @return {String} the ingredient without the measurement & quantity 
-   * (e.g. '1 cup flour' returns 'flour')
-   */
-  function _removeQtyAndMeasurement(ingredient) {
+/**
+ * Removes the quantity and measurement from an ingredient string.
+ * This isn't perfect, it makes the assumption that there will always be a quantity
+ * (sometimes there isn't, so this would fail on something like '2 apples' or 'Some olive oil').
+ * For the purposes of this lab you don't have to worry about those cases.
+ * @param {String} ingredient the raw ingredient string you'd like to process
+ * @return {String} the ingredient without the measurement & quantity 
+ * (e.g. '1 cup flour' returns 'flour')
+ */
+function _removeQtyAndMeasurement(ingredient) {
     return ingredient.split(' ').splice(2).join(' ');
-  }
+}
 
-  ingredientArr.forEach(ingredient => {
+ingredientArr.forEach(ingredient => {
     ingredient = _removeQtyAndMeasurement(ingredient);
     finalIngredientList += `${ingredient}, `;
-  });
+});
 
   // The .slice(0,-2) here gets ride of the extra ', ' added to the last ingredient
   return finalIngredientList.slice(0, -2);
